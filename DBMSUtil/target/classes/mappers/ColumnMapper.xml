@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hundsun.dbutil.dao.ColumnDAO">
+    <resultMap id="mysqlResultMap" type="com.hundsun.dbutil.domain.Column">
+        <result column="COLUMN_NAME" property="columnName"/>
+        <result column="DATA_TYPE" property="dataType"/>
+        <result column="COLUMN_TYPE" property="columnType"/>
+        <result column="CHARACTER_MAXIMUM_LENGTH" property="dataLength"/>
+        <result column="NUMERIC_PRECISION" property="dataPrecision"/>
+        <result column="NUMERIC_SCALE" property="dataScale"/>
+        <result column="IS_NULLABLE" jdbcType="VARCHAR" property="nullAble" javaType="java.lang.String"/>
+        <result column="COLUMN_COMMENT" property="comments"/>
+        <result column="COLUMN_KEY" property="primaryKey"/>
+    </resultMap>
+
+    <resultMap id="oracleResultMap" type="com.hundsun.dbutil.domain.Column">
+        <result column="COLUMN_NAME" property="columnName"/>
+        <result column="DATA_TYPE" property="dataType"/>
+        <result column="DATA_LENGTH" property="dataLength"/>
+        <result column="DATA_PRECISION" property="dataPrecision"/>
+        <result column="DATA_SCALE" property="dataScale"/>
+        <result column="NULLABLE" property="nullAble"/>
+        <result column="COMMENTS" property="comments"/>
+        <result column="CONSTRAINT_TYPE" property="primaryKey"/>
+    </resultMap>
+
+    <select id="getColumnFromMysql" resultMap="mysqlResultMap">
+        SELECT COLUMN_NAME,DATA_TYPE,COLUMN_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION
+        NUMERIC_SCALE,IS_NULLABLE,COLUMN_COMMENT,COLUMN_KEY
+        FROM information_schema.columns where TABLE_SCHEMA = #{schemaName} and
+        TABLE_NAME = #{tableName} and COLUMN_NAME = #{columnName}
+    </select>
+
+    <select id="getAllColumnsFromMysql" resultMap="mysqlResultMap">
+        SELECT COLUMN_NAME,DATA_TYPE,COLUMN_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION
+        NUMERIC_SCALE,IS_NULLABLE,COLUMN_COMMENT,COLUMN_KEY
+        FROM information_schema.columns where TABLE_SCHEMA = #{schemaName} and
+        TABLE_NAME = #{tableName}
+    </select>
+
+    <select id="getColumnFromOracle" resultMap="oracleResultMap">
+         SELECT DISTINCT T1.COLUMN_NAME,T1.DATA_TYPE ,T1.DATA_LENGTH,T1.DATA_PRECISION,T1.DATA_SCALE,T1.NULLABLE,T2.COMMENTS,T5.COLUMN_NAME, T5.CONSTRAINT_TYPE
+         FROM ALL_TAB_COLUMNS T1 LEFT JOIN USER_COL_COMMENTS T2 ON T1.TABLE_NAME=T2.TABLE_NAME AND T1.COLUMN_NAME=T2.COLUMN_NAME
+         LEFT JOIN (SELECT T3.TABLE_NAME,T3.COLUMN_NAME, T4.CONSTRAINT_TYPE FROM USER_CONS_COLUMNS T3, USER_CONSTRAINTS T4
+         WHERE T3.CONSTRAINT_NAME = T4.CONSTRAINT_NAME AND T4.CONSTRAINT_TYPE = 'P' AND T3.TABLE_NAME = T4.TABLE_NAME
+        ) T5 ON T1.TABLE_NAME=T5.TABLE_NAME AND T1.COLUMN_NAME=T5.COLUMN_NAME
+         WHERE T1.TABLE_NAME= #{tableName} and T1.COLUMN_NAME = #{columnName} AND T1.OWNER = #{userName}
+    </select>
+
+    <select id="getAllColumnsFromOracle" resultMap="oracleResultMap">
+        SELECT DISTINCT T1.COLUMN_NAME,T1.DATA_TYPE ,T1.DATA_LENGTH,T1.DATA_PRECISION,T1.DATA_SCALE,T1.NULLABLE,T2.COMMENTS,T5.COLUMN_NAME, T5.CONSTRAINT_TYPE
+        FROM ALL_TAB_COLUMNS T1 LEFT JOIN USER_COL_COMMENTS T2 ON T1.TABLE_NAME=T2.TABLE_NAME AND T1.COLUMN_NAME=T2.COLUMN_NAME
+        LEFT JOIN (SELECT T3.TABLE_NAME,T3.COLUMN_NAME, T4.CONSTRAINT_TYPE FROM USER_CONS_COLUMNS T3, USER_CONSTRAINTS T4
+        WHERE T3.CONSTRAINT_NAME = T4.CONSTRAINT_NAME AND T4.CONSTRAINT_TYPE = 'P' AND T3.TABLE_NAME = T4.TABLE_NAME
+        ) T5 ON T1.TABLE_NAME=T5.TABLE_NAME AND T1.COLUMN_NAME=T5.COLUMN_NAME
+        WHERE T1.TABLE_NAME= #{tableName} AND T1.OWNER = #{userName}
+    </select>
+</mapper>

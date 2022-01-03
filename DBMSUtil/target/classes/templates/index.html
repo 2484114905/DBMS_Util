@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <form id="getDDL" action="#" method="post">    
+        <label for="tableName">表名：</label>
+        <input type="text" id="tableName" name="tableName" placeholder="表名"/><br/>
+        <label for="columnName">字段名：</label>
+        <input type="text" id="columnName" name="columnName" placeholder="列名"/>
+        <label for="DBMSkind">数据库类型</label>
+        <input id = "DBMSkind" name="kind" list="dbms"><br/>
+        <datalist id="dbms">
+            <option value="mysql" />
+            <option value="oracle"/>
+        </datalist>
+       </form>
+      <button type="button" id="submit">确认</button> 
+    </form>
+
+    <div id="app">
+        {{ message }}
+    </div>
+
+    <div id="app-2">
+        <ol>
+            <li v-for="statement in list">
+                {{ statement}}
+            </li>
+        </ol>
+    </div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/vue.js"></script>
+
+    <script>
+       $("#submit").click(function(){ 
+            var data = $("#getDDL").serialize();   
+            console.log(data);
+            $.ajax({
+                url: "http://127.0.0.1:8080/getDDL",
+                data:data,
+                success:function(result){
+                    console.log(result);
+                    app.message=result;
+                }
+            });
+
+            $.ajax({
+                url: "http://127.0.0.1:8080/getIndex",
+                data:data,
+                success:function(result){
+                    console.log(result);
+                    app2.list=result;
+                }
+            });
+        });
+
+        
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: ''
+            }
+        })
+
+        var app2 = new Vue({
+            el: '#app-2',
+            data: {
+                list: ''
+            }
+        })
+   </script>
+</body>
+</html>

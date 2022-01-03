@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hundsun.dbutil.dao.IndexDAO">
+  <resultMap id="mysqlResultMap" type="com.hundsun.dbutil.domain.MysqlIndex">
+    <result property="indexName" column="KEY_NAME"/>
+    <result property="columnName" column="COLUMN_NAME"/>
+    <result property="nonUnique" column="Non_unique" javaType="java.lang.Integer"/>
+  </resultMap>
+
+  <resultMap id="oracleResultMap" type="com.hundsun.dbutil.domain.OracleIndex">
+    <result property="indexName" column="INDEX_NAME"/>
+    <result property="columnName" column="COLUMN_NAME"/>
+    <result property="uniqueness" column="UNIQUENESS"/>
+  </resultMap>
+
+  <select id="getIndexFromMysql" resultMap="mysqlResultMap" >
+    SHOW INDEX FROM ${tableName} WHERE Key_name NOT LIKE "PRIMARY%"
+  </select>
+
+  <select id="getIndexFromOracle" resultMap="oracleResultMap">
+    select DISTINCT T1.INDEX_NAME, T1.COLUMN_NAME, T2.UNIQUENESS from user_ind_columns T1 left join user_indexes T2
+    on T1.TABLE_NAME = T2.TABLE_NAME AND T1.INDEX_NAME = T2.INDEX_NAME
+    where T1.table_name=#{tableName}
+    and T1.INDEX_NAME NOT LIKE 'PK%'
+  </select>
+</mapper>
